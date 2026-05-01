@@ -1,0 +1,13 @@
+services:
+  template:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    image: template
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    env_file:
+      - .env

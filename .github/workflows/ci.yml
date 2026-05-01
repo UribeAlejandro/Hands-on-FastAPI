@@ -1,0 +1,32 @@
+name: Continuous Integration
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install the project
+        run: uv sync --all-groups
+
+      - name: Run Ruff
+        run: uv run ruff check --output-format=github .
+
+      - name: Static type checking with Ty
+        run: |
+          uv run ty check
+
+      - name: Test with pytest
+        run: |
+          uv run pytest
