@@ -20,14 +20,25 @@ install:		## Install dependencies
 	@echo "Updating pre-commit hooks"
 	uv run pre-commit autoupdate
 
+.PHONY: run
+run:			## Run the application
+	@echo "Running the application"
+	uv run fastapi dev src/main.py
+
 .PHONY: test
 test:			## Run the tests
 	@echo "Running tests"
 	uv run pytest tests
 
+
+.PHONY: build-docker
+build-docker:		## Build the Docker image
+	@echo "Building Docker image"
+	docker compose build
+
 .PHONY: test-docker
 test-docker:		## Run the tests in a Docker container
 	@echo "Building Docker image"
-	docker compose build
+	make build-docker
 	@echo "Running tests in Docker container"
-	docker compose run --rm template uv run pytest tests
+	docker compose run --rm app uv run pytest tests

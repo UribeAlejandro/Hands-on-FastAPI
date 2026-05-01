@@ -1,13 +1,16 @@
 services:
-  template:
+  app:
     build:
         context: .
         dockerfile: Dockerfile
-    image: template
+    image: hands-on-fastapi
+    container_name: hands-on-fastapi
+    hostname: hands-on-fastapi
     ports:
-      - "8080:8080"
+      - "8000:8000"
     volumes:
       - ./src:/app/src
       - ./tests:/app/tests
     env_file:
       - .env
+    command: fastapi dev src/main.py

@@ -31,4 +31,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
 
 # Run the application
-CMD [".venv/bin/python", "-m", "src.main"]
+#Get env var for PORT
+CMD ["fastapi", "run", "--workers", "2", "--host", "0.0.0.0", "--port", "8080", "src/main.py"]
