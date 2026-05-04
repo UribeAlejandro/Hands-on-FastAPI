@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.anyio
 async def test_root(test_app) -> None:
     """Test the root endpoint of the FastAPI application."""

@@ -3,13 +3,13 @@ from collections.abc import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 
+from src.common.config import Environment, settings
 from src.common.database import get_db
 from src.main import app
-from src.common.config import Environment, settings
 
 pytest_plugins = ["anyio"]
 
@@ -19,12 +19,12 @@ if settings.environment == Environment.local:
 
 @pytest.fixture(scope="session")
 def anyio_backend() -> str:
-    """Specifies the AnyIO backend to use for asynchronous tests. In this case, we are using "asyncio" as the backend."""
+    """Specifies the AnyIO backend to use for asynchronous tests."""
     return "asyncio"
 
 
 @pytest.fixture(scope="session")
-def test_engine() -> AsyncGenerator:
+def test_engine() -> AsyncEngine:
     """Creates an asynchronous engine for testing, using an in-memory SQLite database."""
     engine = create_async_engine(
         os.environ["DATABASE_URL"],
@@ -36,8 +36,7 @@ def test_engine() -> AsyncGenerator:
 
 @pytest.fixture(scope="session")
 async def setup_database(test_engine):
-    """Sets up the database for testing by creating the necessary tables before tests run and dropping them afterward."""
-
+    """Sets up the database for testing."""
     if settings.environment == Environment.local:
         async with test_engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)
@@ -53,7 +52,7 @@ async def setup_database(test_engine):
 
 @pytest.fixture
 async def test_db_session(test_engine, setup_database) -> AsyncGenerator[AsyncSession]:
-    """Provides a database session for testing, using an in-memory SQLite database. The session is rolled back after each test to ensure isolation."""
+    """Provides a database session for testing, using a SQLite database."""
     conn = await test_engine.connect()
     trans = await conn.begin()
 
