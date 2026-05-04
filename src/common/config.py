@@ -8,6 +8,7 @@ class Environment(StrEnum):
     """Application runtime environments."""
 
     local = "local"
+    ci = "ci"
     dev = "dev"
     live = "live"
 

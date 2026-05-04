@@ -10,7 +10,7 @@ from src.todo.service import ToDoService
 router = APIRouter(prefix="/todo", tags=["To Do"])
 
 
-@router.post("/", response_model=ToDo)
+@router.post("/", response_model=ToDo, status_code=201)
 async def create_todo(todo: ToDoCreate, service: ToDoService = Depends(get_to_do_service)) -> ToDo:
     """
     Create a new ToDo item.
@@ -55,7 +55,7 @@ async def list_todos(
     return await service.list_todos(search, limit, offset)
 
 
-@router.get("/{todo_id}", response_model=ToDo | None)
+@router.get("/{todo_id}", response_model=ToDo | None, status_code=200)
 async def get_todo_by_id(
     todo_id: UUID,
     service: ToDoService = Depends(get_to_do_service),
@@ -76,7 +76,7 @@ async def get_todo_by_id(
     return await service.get_by_id(todo_id)
 
 
-@router.delete("/{todo_id}")
+@router.delete("/{todo_id}", status_code=200)
 async def delete_todo_by_id(
     todo_id: UUID,
     service: ToDoService = Depends(get_to_do_service),
@@ -98,7 +98,7 @@ async def delete_todo_by_id(
     return JSONResponse(content={"deleted": deleted})
 
 
-@router.put("/{todo_id}", response_model=ToDo | None)
+@router.put("/{todo_id}", response_model=ToDo | None, status_code=201)
 async def update_todo_by_id(
     todo_id: UUID,
     todo: ToDoCreate,

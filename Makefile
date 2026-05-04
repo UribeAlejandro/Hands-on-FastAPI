@@ -42,3 +42,8 @@ test-docker:		## Run the tests in a Docker container
 	make build-docker
 	@echo "Running tests in Docker container"
 	docker compose run --rm app uv run pytest tests
+
+.PHONY: run-migrations
+run-migrations:		## Run database migrations
+	@echo "Running database migrations"
+	uv run alembic upgrade head

@@ -29,8 +29,8 @@ jobs:
 
       - name: Run Alembic Migrations
         run: |
-          uv run alembic upgrade head
+          make run-migrations
 
       - name: Test with pytest
         run: |
-          uv run pytest
+          make test
