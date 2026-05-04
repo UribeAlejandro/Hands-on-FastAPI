@@ -21,5 +21,9 @@ class AppSettings(BaseSettings):
     version: str
     description: str
 
+    # Database settings
+    echo_sql: bool
+    database_url: str
+
 
 settings = AppSettings()  # ty: ignore[missing-argument]

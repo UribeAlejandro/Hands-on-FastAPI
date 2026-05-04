@@ -1,4 +1,5 @@
-env
+.env
+.env.template
 .dockerignore
 Dockerfile
 tests/
@@ -9,7 +10,7 @@ notebooks/
 .gitignore
 .pre-commit-config.yaml
 data.dvc
-docker-compose.yml
+compose.yml
 Makefile
 README.md
 .dvcignore
@@ -18,3 +19,4 @@ README.md
 .mypy_cache
 .pytest_cache
 .ruff_cache
+.venv/

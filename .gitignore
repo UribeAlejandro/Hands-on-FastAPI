@@ -1,3 +1,7 @@
+# Database
+*.db
+database/*.db
+
 # Other
 .DS_Store
 ._.DS_Store
