@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.todo.models import ToDo, ToDoCreate
+from src.todo.models import PaginatedTodos, ToDo, ToDoCreate
 from src.todo.repository import ToDoRepository
 
 
@@ -26,7 +26,7 @@ class ToDoService:
         """
         return await self.repository.create_todo(todo)
 
-    async def list_todos(self, search: str, limit: int, offset: int) -> list[ToDo]:
+    async def list_todos(self, search: str, limit: int, offset: int) -> PaginatedTodos:
         """
         List ToDo items with optional search, pagination, and filtering.
 
@@ -44,7 +44,9 @@ class ToDoService:
         list[ToDo]
             A list of ToDo items matching the search criteria and pagination settings.
         """
-        return await self.repository.list_todos(search, limit, offset)
+        items = await self.repository.list_todos(search, limit, offset)
+        total = await self.repository.count_todos(search)
+        return PaginatedTodos(total=total, items=items)
 
     async def get_by_id(self, todo_id: UUID) -> ToDo | None:
         """

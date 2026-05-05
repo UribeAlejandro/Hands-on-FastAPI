@@ -1,5 +1,6 @@
 from uuid import UUID, uuid4
 
+from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 
 
@@ -24,3 +25,9 @@ class ToDoCreate(ToDoBase):
     """Model for creating a new ToDo item."""
 
     pass
+
+class PaginatedTodos(BaseModel):
+    """Model for paginated ToDo items."""
+
+    total: int
+    items: list[ToDo]

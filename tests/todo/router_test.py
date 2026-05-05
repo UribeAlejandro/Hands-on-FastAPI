@@ -24,7 +24,14 @@ async def test_list_todos(test_app) -> None:
     response = await test_app.get("/todo/")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
+    assert "total" in data
+    assert "items" in data
+    assert isinstance(data["items"], list)
+    assert all("id" in item for item in data["items"])
+    assert all("title" in item for item in data["items"])
+    assert all("description" in item for item in data["items"])
+    assert all("priority" in item for item in data["items"])
+    assert all("completed" in item for item in data["items"])
 
 
 @pytest.mark.anyio

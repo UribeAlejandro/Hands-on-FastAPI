@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from src.todo.dependency import get_to_do_service
-from src.todo.models import ToDo, ToDoCreate
+from src.todo.models import PaginatedTodos, ToDo, ToDoCreate
 from src.todo.service import ToDoService
 
 router = APIRouter(prefix="/todo", tags=["To Do"])
@@ -28,13 +28,13 @@ async def create_todo(todo: ToDoCreate, service: ToDoService = Depends(get_to_do
     return await service.create_todo(todo)
 
 
-@router.get("/", response_model=list[ToDo])
+@router.get("/", response_model=PaginatedTodos, status_code=200)
 async def list_todos(
     search: str = Query("", description="Search term to filter ToDo items by title"),
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
     service: ToDoService = Depends(get_to_do_service),
-) -> list[ToDo]:
+) -> PaginatedTodos:
     """
     List ToDo items with optional search, pagination, and filtering.
 
@@ -49,8 +49,8 @@ async def list_todos(
 
     Returns
     -------
-    list[ToDo]
-        A list of ToDo items matching the search criteria and pagination settings.
+    PaginatedTodos
+        A paginated list of ToDo items matching the search criteria and pagination settings.
     """
     return await service.list_todos(search, limit, offset)
 

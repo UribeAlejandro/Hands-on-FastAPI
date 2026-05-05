@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import or_, select
 
@@ -119,3 +120,23 @@ class ToDoRepository:
         await self.session.commit()
         await self.session.refresh(existing_todo)
         return existing_todo
+
+    async def count_todos(self, search: str) -> int:
+        """
+        Count the total number of ToDo items matching the search criteria.
+
+        Parameters
+        ----------
+        search : str
+            A search term to filter ToDo items by title.
+
+        Returns
+        -------
+        int
+            The total number of ToDo items matching the search criteria.
+        """
+        query = select(func.count(ToDo.id))
+        if search:
+            query = query.where(or_(ToDo.title.ilike(f"%{search}%"), ToDo.description.ilike(f"%{search}%")))  # ty:ignore[unresolved-attribute]
+        result = await self.session.execute(query)
+        return result.scalar_one()  # ty:ignore[invalid-return-type]
