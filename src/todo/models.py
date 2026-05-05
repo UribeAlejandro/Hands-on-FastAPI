@@ -26,6 +26,7 @@ class ToDoCreate(ToDoBase):
 
     pass
 
+
 class PaginatedTodos(BaseModel):
     """Model for paginated ToDo items."""
 

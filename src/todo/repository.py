@@ -135,8 +135,8 @@ class ToDoRepository:
         int
             The total number of ToDo items matching the search criteria.
         """
-        query = select(func.count(ToDo.id))
+        query = select(func.count(ToDo.id))  # ty:ignore[invalid-argument-type]
         if search:
             query = query.where(or_(ToDo.title.ilike(f"%{search}%"), ToDo.description.ilike(f"%{search}%")))  # ty:ignore[unresolved-attribute]
         result = await self.session.execute(query)
-        return result.scalar_one()  # ty:ignore[invalid-return-type]
+        return result.scalar_one()
