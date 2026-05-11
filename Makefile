@@ -28,7 +28,9 @@ run:			## Run the application
 .PHONY: test
 test:			## Run the tests
 	@echo "Running tests"
-	set -a && [ -f .env ] && . .env && set +a && \
+	@if [ -f .env ]; then \
+		set -a; . .env; set +a; \
+	fi; \
 	uv run pytest tests
 
 .PHONY: build-docker
