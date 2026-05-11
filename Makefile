@@ -28,20 +28,13 @@ run:			## Run the application
 .PHONY: test
 test:			## Run the tests
 	@echo "Running tests"
+	set -a && [ -f .env ] && . .env && set +a && \
 	uv run pytest tests
-
 
 .PHONY: build-docker
 build-docker:		## Build the Docker image
 	@echo "Building Docker image"
 	docker compose build
-
-.PHONY: test-docker
-test-docker:		## Run the tests in a Docker container
-	@echo "Building Docker image"
-	make build-docker
-	@echo "Running tests in Docker container"
-	docker compose run --rm app uv run pytest tests
 
 .PHONY: run-migrations
 run-migrations:		## Run database migrations

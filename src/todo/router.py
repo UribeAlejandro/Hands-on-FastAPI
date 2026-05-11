@@ -1,8 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 
 from src.todo.dependency import get_to_do_service
 from src.todo.models import PaginatedTodos, ToDo, ToDoCreate
@@ -11,8 +10,11 @@ from src.todo.service import ToDoService
 router = APIRouter(prefix="/todo", tags=["To Do"])
 
 
-@router.post("/", response_model=ToDo, status_code=201)
-async def create_todo(todo: ToDoCreate, service: Annotated[ToDoService, Depends(get_to_do_service)]) -> ToDo:
+@router.post("/", response_model=ToDo, status_code=status.HTTP_201_CREATED)
+async def create_todo(
+    service: Annotated[ToDoService, Depends(get_to_do_service)],
+    todo: ToDoCreate = Body(..., description="The ToDo item) to create"),
+) -> ToDo:
     """
     Create a new ToDo item.
 
@@ -29,7 +31,7 @@ async def create_todo(todo: ToDoCreate, service: Annotated[ToDoService, Depends(
     return await service.create_todo(todo)
 
 
-@router.get("/", response_model=PaginatedTodos, status_code=200)
+@router.get("/", response_model=PaginatedTodos, status_code=status.HTTP_200_OK)
 async def list_todos(
     service: Annotated[ToDoService, Depends(get_to_do_service)],
     search: str = Query("", description="Search term to filter ToDo items by title"),
@@ -56,10 +58,10 @@ async def list_todos(
     return await service.list_todos(search, limit, offset)
 
 
-@router.get("/{todo_id}", response_model=ToDo | None, status_code=200)
+@router.get("/{todo_id}", response_model=ToDo | None, status_code=status.HTTP_200_OK)
 async def get_todo_by_id(
-    todo_id: UUID,
-    service: ToDoService = Depends(get_to_do_service),
+    service: Annotated[ToDoService, Depends(get_to_do_service)],
+    todo_id: UUID = Path(..., description="The ID of the ToDo item to retrieve"),
 ) -> ToDo | None:
     """
     Get a ToDo item by its ID.
@@ -74,14 +76,17 @@ async def get_todo_by_id(
     ToDo | None
         The ToDo item with the specified ID, or None if not found.
     """
-    return await service.get_by_id(todo_id)
+    _todo = await service.get_by_id(todo_id)
+    if _todo is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ToDo item not found")
+    return _todo
 
 
-@router.delete("/{todo_id}", status_code=200)
+@router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo_by_id(
-    todo_id: UUID,
     service: Annotated[ToDoService, Depends(get_to_do_service)],
-) -> JSONResponse:
+    todo_id: UUID = Path(..., description="The ID of the ToDo item to delete"),
+) -> None:
     """
     Delete a ToDo item by its ID.
 
@@ -89,22 +94,18 @@ async def delete_todo_by_id(
     ----------
     todo_id : UUID
         The ID of the ToDo item to delete.
-
-    Returns
-    -------
-    JSONResponse
-        A JSON response indicating whether the ToDo item was deleted.
     """
     deleted = await service.delete_todo(todo_id)
-    return JSONResponse(content={"deleted": deleted})
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ToDo item not found")
 
 
-@router.put("/{todo_id}", response_model=ToDo | None, status_code=201)
+@router.put("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_todo_by_id(
-    todo_id: UUID,
-    todo: ToDoCreate,
     service: Annotated[ToDoService, Depends(get_to_do_service)],
-) -> ToDo | None:
+    todo_id: UUID = Path(..., description="The ID of the ToDo item to update"),
+    todo: ToDoCreate = Body(..., description="The updated ToDo item data"),
+) -> None:
     """
     Update a ToDo item by its ID.
 
@@ -116,10 +117,7 @@ async def update_todo_by_id(
         The updated ToDo item data.
     service : ToDoService, optional
         The ToDo service instance, by default Depends(get_to_do_service)
-
-    Returns
-    -------
-    ToDo | None
-        The updated ToDo item, or None if not found.
     """
-    return await service.update_todo(todo_id, todo)
+    _todo = await service.update_todo(todo_id, todo)
+    if _todo is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ToDo item not found")

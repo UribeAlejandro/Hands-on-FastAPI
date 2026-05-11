@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from src.todo.models import ToDoCreate
@@ -67,9 +69,12 @@ async def test_delete_todo_by_id(test_app) -> None:
 
     # Now, delete the created todo item by its ID
     response = await test_app.delete(f"/todo/{todo_id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["deleted"] is True
+    assert response.status_code == 204
+
+    # Try to delete a non-existent todo item
+    _uuid = uuid.uuid4()
+    response = await test_app.delete(f"/todo/{_uuid}")
+    assert response.status_code == 404
 
 
 @pytest.mark.anyio
@@ -85,10 +90,9 @@ async def test_update_todo_by_id(test_app) -> None:
     # Now, update the created todo item by its ID
     updated_todo = ToDoCreate(title="Updated Test Todo", description="This is an updated test todo item.", priority=2)
     response = await test_app.put(f"/todo/{todo_id}", json=updated_todo.model_dump())
-    assert response.status_code == 201
-    data = response.json()
-    assert data["id"] == todo_id
-    assert data["title"] == "Updated Test Todo"
-    assert data["description"] == "This is an updated test todo item."
-    assert data["priority"] == 2
-    assert data["completed"] is False
+    assert response.status_code == 204
+
+    # Try to update a non-existent todo item
+    _uuid = uuid.uuid4()
+    response = await test_app.put(f"/todo/{_uuid}", json=updated_todo.model_dump())
+    assert response.status_code == 404
