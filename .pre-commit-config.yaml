@@ -34,14 +34,12 @@ repos:
       - id: ruff-format
         types_or: [python, pyi, jupyter]
 
-  - repo: local
+  - repo: https://github.com/facebook/pyrefly-pre-commit
+    rev: 0.64.1
     hooks:
-      - id: ty
-        name: ty check
-        entry: uv run ty check
-        language: system
+      - id: pyrefly-check
+        name: Pyrefly (type checking)
         pass_filenames: false
-        always_run: true
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.2

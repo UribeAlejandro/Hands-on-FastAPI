@@ -19,9 +19,18 @@ logger = structlog.get_logger(__name__)
 async def lifespan(_app: FastAPI) -> AsyncGenerator:
     """Lifespan context manager for FastAPI application."""
     logger.info("Starting up...")
+    logger.info(
+        "Database Connection",
+        dialect=async_engine.dialect.name,
+        driver=async_engine.driver,
+        echo=async_engine.echo,
+    )
+
+    logger.info("Startup finished.")
     yield
     logger.info("Shutting down...")
     await async_engine.dispose()
+    logger.info("Shutdown finished.")
 
 
 app = FastAPI(

@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import or_, select
+from sqlmodel import Sequence, col, func, or_, select
 
 from src.todo.models import ToDo, ToDoCreate
 
@@ -33,7 +32,7 @@ class ToDoRepository:
         await self.session.refresh(_todo)
         return _todo
 
-    async def list_todos(self, search: str, limit: int, offset: int) -> list[ToDo]:
+    async def list_todos(self, search: str, limit: int, offset: int) -> Sequence[ToDo]:
         """
         List ToDo items with optional search, pagination, and filtering.
 
@@ -48,14 +47,14 @@ class ToDoRepository:
 
         Returns
         -------
-        list[ToDo]
+        Sequence[ToDo]
             A list of ToDo items matching the search criteria and pagination settings.
         """
         query = select(ToDo)
         if search:
-            query = query.where(or_(ToDo.title.ilike(f"%{search}%"), ToDo.description.ilike(f"%{search}%")))  # ty:ignore[unresolved-attribute]
+            query = query.where(or_(col(ToDo.title).ilike(f"%{search}%"), col(ToDo.description).ilike(f"%{search}%")))
         result = await self.session.execute(query.offset(offset).limit(limit))
-        return result.scalars().all()  # ty:ignore[invalid-return-type]
+        return result.scalars().all()
 
     async def get_by_id(self, todo_id: UUID) -> ToDo | None:
         """
@@ -135,8 +134,8 @@ class ToDoRepository:
         int
             The total number of ToDo items matching the search criteria.
         """
-        query = select(func.count(ToDo.id))  # ty:ignore[invalid-argument-type]
+        query = select(func.count(col(ToDo.id)))
         if search:
-            query = query.where(or_(ToDo.title.ilike(f"%{search}%"), ToDo.description.ilike(f"%{search}%")))  # ty:ignore[unresolved-attribute]
+            query = query.where(or_(col(ToDo.title).ilike(f"%{search}%"), col(ToDo.description).ilike(f"%{search}%")))
         result = await self.session.execute(query)
         return result.scalar_one()

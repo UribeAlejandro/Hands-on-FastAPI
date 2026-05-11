@@ -27,4 +27,4 @@ class AppSettings(BaseSettings):
     database_url: str
 
 
-settings = AppSettings()  # ty: ignore[missing-argument]
+settings = AppSettings()

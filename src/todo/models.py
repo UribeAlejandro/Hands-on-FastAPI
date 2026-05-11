@@ -16,7 +16,7 @@ class ToDoBase(SQLModel):
 class ToDo(ToDoBase, table=True):
     """Model representing a ToDo item in the database."""
 
-    __tablename__ = "todos"
+    __tablename__ = "todos"  # pyrefly: ignore[bad-override]
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 

@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/todo", tags=["To Do"])
 
 
 @router.post("/", response_model=ToDo, status_code=201)
-async def create_todo(todo: ToDoCreate, service: ToDoService = Depends(get_to_do_service)) -> ToDo:
+async def create_todo(todo: ToDoCreate, service: Annotated[ToDoService, Depends(get_to_do_service)]) -> ToDo:
     """
     Create a new ToDo item.
 
@@ -30,10 +31,10 @@ async def create_todo(todo: ToDoCreate, service: ToDoService = Depends(get_to_do
 
 @router.get("/", response_model=PaginatedTodos, status_code=200)
 async def list_todos(
+    service: Annotated[ToDoService, Depends(get_to_do_service)],
     search: str = Query("", description="Search term to filter ToDo items by title"),
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    service: ToDoService = Depends(get_to_do_service),
 ) -> PaginatedTodos:
     """
     List ToDo items with optional search, pagination, and filtering.
@@ -79,7 +80,7 @@ async def get_todo_by_id(
 @router.delete("/{todo_id}", status_code=200)
 async def delete_todo_by_id(
     todo_id: UUID,
-    service: ToDoService = Depends(get_to_do_service),
+    service: Annotated[ToDoService, Depends(get_to_do_service)],
 ) -> JSONResponse:
     """
     Delete a ToDo item by its ID.
@@ -102,7 +103,7 @@ async def delete_todo_by_id(
 async def update_todo_by_id(
     todo_id: UUID,
     todo: ToDoCreate,
-    service: ToDoService = Depends(get_to_do_service),
+    service: Annotated[ToDoService, Depends(get_to_do_service)],
 ) -> ToDo | None:
     """
     Update a ToDo item by its ID.

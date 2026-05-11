@@ -23,9 +23,9 @@ jobs:
       - name: Run Ruff
         run: uv run ruff check --output-format=github .
 
-      - name: Static type checking with Ty
+      - name: Run Pyrefly Type Checker
         run: |
-          uv run ty check
+          uv run pyrefly check --output-format=github
 
       - name: Run Alembic Migrations
         run: |
