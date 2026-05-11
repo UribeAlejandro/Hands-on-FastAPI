@@ -1,20 +1,18 @@
 import os
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Generator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
+from testcontainers.postgres import PostgresContainer
 
-from src.common.config import Environment, settings
+from src.common.config import settings
 from src.common.database import get_db
 from src.main import app
 
 pytest_plugins = ["anyio"]
-
-if settings.environment == Environment.local:
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./database/test.db"
 
 
 @pytest.fixture(scope="session")
@@ -24,34 +22,39 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture(scope="session")
-def test_engine() -> AsyncEngine:
-    """Creates an asynchronous engine for testing, using an in-memory SQLite database."""
-    engine = create_async_engine(
-        os.environ["DATABASE_URL"],
-        poolclass=NullPool,
-        echo=settings.echo_sql,
-    )
-    return engine
+def database_container() -> Generator[PostgresContainer]:
+    """Sets up a PostgreSQL database for testing using Testcontainers."""
+    with PostgresContainer("postgres:16-alpine") as postgres:
+        yield postgres
 
 
 @pytest.fixture(scope="session")
-async def setup_database(test_engine):
+async def test_engine(database_container: PostgresContainer) -> AsyncGenerator[AsyncEngine]:
+    """Creates an asynchronous engine for testing, using an in-memory SQLite database."""
+    url = database_container.get_connection_url().replace("postgresql+psycopg2", "postgresql+asyncpg")
+    os.environ["TEST_DATABASE_URL"] = url
+    engine = create_async_engine(
+        url,
+        poolclass=NullPool,
+        echo=settings.echo_sql,
+    )
+    yield engine
+
+
+@pytest.fixture(scope="session")
+async def setup_database(test_engine: AsyncEngine):
     """Sets up the database for testing."""
-    if settings.environment == Environment.local:
-        async with test_engine.begin() as conn:
-            await conn.run_sync(SQLModel.metadata.create_all)
+    async with test_engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
 
     yield
 
-    if settings.environment == Environment.local:
-        async with test_engine.begin() as conn:
-            await conn.run_sync(SQLModel.metadata.drop_all)
-
-    await test_engine.dispose()
+    async with test_engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.drop_all)
 
 
 @pytest.fixture
-async def test_db_session(test_engine, setup_database) -> AsyncGenerator[AsyncSession]:
+async def test_db_session(test_engine: AsyncEngine, setup_database) -> AsyncGenerator[AsyncSession]:
     """Provides a database session for testing, using a SQLite database."""
     conn = await test_engine.connect()
     trans = await conn.begin()

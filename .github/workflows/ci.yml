@@ -27,10 +27,6 @@ jobs:
         run: |
           uv run pyrefly check --output-format=github
 
-      - name: Run Alembic Migrations
-        run: |
-          make run-migrations
-
       - name: Test with pytest
         run: |
           make test
