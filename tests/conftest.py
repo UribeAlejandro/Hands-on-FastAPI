@@ -8,9 +8,11 @@ from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 from testcontainers.postgres import PostgresContainer
 
+from src.auth.models import UserCreate, UserRead
 from src.common.config import settings
 from src.common.database import get_db
 from src.main import app
+from src.todo.models import ToDo, ToDoCreate
 
 pytest_plugins = ["anyio"]
 
@@ -24,7 +26,7 @@ def anyio_backend() -> str:
 @pytest.fixture(scope="session")
 def database_container() -> Generator[PostgresContainer]:
     """Sets up a PostgreSQL database for testing using Testcontainers."""
-    with PostgresContainer("postgres:16-alpine") as postgres:
+    with PostgresContainer("postgres:18-alpine") as postgres:
         yield postgres
 
 
@@ -92,3 +94,57 @@ async def test_app(test_db_session: AsyncSession) -> AsyncGenerator[AsyncClient]
         yield ac
 
     app.dependency_overrides.clear()
+
+
+async def create_user(test_app) -> UserRead:
+    """
+    Creates a new user for testing.
+
+    Parameters
+    ----------
+    test_app : AsyncClient
+        The test client to use for making requests to the application.
+
+    Returns
+    -------
+    UserRead
+        The created user.
+    """
+    _user = UserCreate(
+        username="testuser1",
+        email="user@user.com",
+        password="password12345678910",
+        first_name="Test",
+        last_name="User",
+        role="user",
+    )
+    response = await test_app.post("/auth", json=_user.model_dump())
+    assert response.status_code == 201, f"Failed to create user: {response.text}"
+    return UserRead.model_validate(response.json())
+
+
+async def create_todo(test_app, user_id) -> ToDo:
+    """
+    Creates a new todo item for testing.
+
+    Parameters
+    ----------
+    test_app : AsyncClient
+        The test client to use for making requests to the application.
+    user_id : UUID
+        The ID of the user to associate with the todo item.
+
+    Returns
+    -------
+    ToDo
+        The created todo item.
+    """
+    _todo = ToDoCreate(
+        title="Test Todo",
+        description="This is a test todo item.",
+        priority=1,
+        user_id=user_id,
+    )
+    response = await test_app.post("/todo/", json=_todo.model_dump())
+    assert response.status_code == 201, f"Failed to create todo: {response.text}"
+    return ToDo.model_validate(response.json())

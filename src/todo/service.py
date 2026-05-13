@@ -1,7 +1,8 @@
 from uuid import UUID
 
-from src.todo.models import PaginatedTodos, ToDo, ToDoCreate
+from src.todo.models import ToDo, ToDoCreate, ToDoUpdate
 from src.todo.repository import ToDoRepository
+from src.todo.schemas import PaginatedTodos
 
 
 class ToDoService:
@@ -80,7 +81,7 @@ class ToDoService:
         """
         return await self.repository.delete_todo(todo_id)
 
-    async def update_todo(self, todo_id: UUID, todo: ToDoCreate) -> ToDo | None:
+    async def update_todo(self, todo_id: UUID, todo: ToDoUpdate) -> ToDo | None:
         """
         Update a ToDo item by its ID.
 
@@ -88,7 +89,7 @@ class ToDoService:
         ----------
         todo_id : UUID
             The ID of the ToDo item to update.
-        todo : ToDoCreate
+        todo : ToDoUpdate
             The updated ToDo item data.
 
         Returns

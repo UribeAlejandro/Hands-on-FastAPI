@@ -3,8 +3,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 
+from src.common.exceptions import UserNotFoundException
 from src.todo.dependency import get_to_do_service
-from src.todo.models import PaginatedTodos, ToDo, ToDoCreate
+from src.todo.models import ToDo, ToDoCreate, ToDoUpdate
+from src.todo.schemas import PaginatedTodos
 from src.todo.service import ToDoService
 
 router = APIRouter(prefix="/todo", tags=["To Do"])
@@ -28,7 +30,11 @@ async def create_todo(
     ToDo
         The created ToDo item.
     """
-    return await service.create_todo(todo)
+    try:
+        _todo = await service.create_todo(todo)
+    except UserNotFoundException:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="User not found")
+    return _todo
 
 
 @router.get("/", response_model=PaginatedTodos, status_code=status.HTTP_200_OK)
@@ -104,7 +110,7 @@ async def delete_todo_by_id(
 async def update_todo_by_id(
     service: Annotated[ToDoService, Depends(get_to_do_service)],
     todo_id: UUID = Path(..., description="The ID of the ToDo item to update"),
-    todo: ToDoCreate = Body(..., description="The updated ToDo item data"),
+    todo: ToDoUpdate = Body(..., description="The updated ToDo item data"),
 ) -> None:
     """
     Update a ToDo item by its ID.

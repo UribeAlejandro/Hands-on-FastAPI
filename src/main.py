@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 
+from src.auth.router import router as auth_router
 from src.common.config import settings
 from src.common.database import async_engine
 from src.common.logger import setup_logger
@@ -42,3 +43,4 @@ app = FastAPI(
 )
 app.include_router(root_router)
 app.include_router(todo_router)
+app.include_router(auth_router)

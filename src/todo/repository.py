@@ -3,7 +3,9 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import Sequence, col, func, or_, select
 
-from src.todo.models import ToDo, ToDoCreate
+from src.auth.models import User
+from src.common.exceptions import UserNotFoundException
+from src.todo.models import ToDo, ToDoCreate, ToDoUpdate
 
 
 class ToDoRepository:
@@ -26,7 +28,13 @@ class ToDoRepository:
         ToDo
             The created ToDo item.
         """
+        user_id = todo.user_id
         _todo = ToDo(**todo.model_dump())
+        # Check user_id exists
+        result = await self.session.get(User, user_id)
+        if not result:
+            raise UserNotFoundException(f"User with id {user_id} does not exist.")
+
         self.session.add(_todo)
         await self.session.commit()
         await self.session.refresh(_todo)
@@ -94,7 +102,7 @@ class ToDoRepository:
         await self.session.commit()
         return True
 
-    async def update_todo(self, todo_id: UUID, todo: ToDoCreate) -> ToDo | None:
+    async def update_todo(self, todo_id: UUID, todo: ToDoUpdate) -> ToDo | None:
         """
         Update a ToDo item by its ID.
 
@@ -102,7 +110,7 @@ class ToDoRepository:
         ----------
         todo_id : UUID
             The ID of the ToDo item to update.
-        todo : ToDoCreate
+        todo : ToDoUpdate
             The updated ToDo item data.
 
         Returns
@@ -113,8 +121,10 @@ class ToDoRepository:
         existing_todo = await self.get_by_id(todo_id)
         if not existing_todo:
             return None
-        for key, value in todo.model_dump().items():
+
+        for key, value in todo.model_dump(exclude_none=True).items():
             setattr(existing_todo, key, value)
+
         self.session.add(existing_todo)
         await self.session.commit()
         await self.session.refresh(existing_todo)
