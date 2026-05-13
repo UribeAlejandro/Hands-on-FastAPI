@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked
 
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
 
 # Copy the environment, but not the source code
 COPY --from=builder --chown=app:app /app/.venv /app/.venv

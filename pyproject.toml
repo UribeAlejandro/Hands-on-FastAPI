@@ -18,12 +18,12 @@ dependencies = [
     "structlog>=25.5.0",
     "uuid>=1.30",
     "bcrypt==4.0.1",
-    "passlib>=1.7.4",
+    "passlib==1.7.4",
 ]
 
 [dependency-groups]
 dev = [
-    "pyrefly>=0.64.1",
+    "pyrefly>=1.0.0",
     "ruff>=0.15.12",
     "pre-commit>=4.6.0",
     "python-dotenv>=1.2.1",

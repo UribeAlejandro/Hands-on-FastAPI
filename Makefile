@@ -12,7 +12,7 @@ help:			## Show the help.
 .PHONY: install
 install:		## Install dependencies
 	@echo "Installing Python"
-	uv python install 3.14
+	uv python install
 	@echo "Installing dependencies"
 	uv sync --all-groups
 	@echo "Installing pre-commit hooks"
@@ -33,12 +33,19 @@ test:			## Run the tests
 	fi; \
 	uv run pytest tests
 
-.PHONY: build-docker
-build-docker:		## Build the Docker image
-	@echo "Building Docker image"
+.PHONY: run-docker
+run-docker:		## Run the application in Docker
+	@echo "Running the application in Docker"
 	docker compose build
+	docker compose up -d
+	docker compose exec app uv run alembic upgrade head
 
 .PHONY: run-migrations
 run-migrations:		## Run database migrations
 	@echo "Running database migrations"
 	uv run alembic upgrade head
+
+.PHONY: build-docker
+build-docker:		## Build the Docker image
+	@echo "Building the Docker image"
+	docker build -t hands-on-fastapi:production . --no-cache
