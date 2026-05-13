@@ -29,11 +29,11 @@ jobs:
 
       - name: Run Ruff
         run: |
-          uv run ruff check --output-format=github .
+          uv run ruff check --output-format=github
 
       - name: Run Pyrefly Type Checker
         run: |
-          uv run pyrefly check --output-format=github .
+          uv run pyrefly check --output-format=github
 
   test:
     name: Test
