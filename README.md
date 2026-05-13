@@ -1,29 +1,12 @@
 # Hands On FastAPI
 
-## Keywords
+[![Continuous Integration](https://github.com/UribeAlejandro/Hands-on-FastAPI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/UribeAlejandro/Hands-on-FastAPI/actions/workflows/ci.yml)
 
-- FastAPI
-- Python
-- Docker
-- Test Containers
-- PostgreSQL
-- SQLAlchemy
-- Alembic
-- Pydantic
-- AsyncIO
-- Dependency Injection
-- RESTful API
-- CRUD Operations
-- Swagger UI
-- UV
-- Pytest
-- CI/CD
-- GitHub Actions
-
+## Overview
 
 This repository contains a hands-on tutorial for building a TODO application using FastAPI. It covers the basics of FastAPI, including how to create endpoints, handle requests and responses, dependency injection, and more.
 
-### Getting Started
+## Getting Started
 
 To get started, install:
 
