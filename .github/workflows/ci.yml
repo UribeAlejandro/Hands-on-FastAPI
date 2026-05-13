@@ -32,10 +32,10 @@ jobs:
           make test
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build Docker image - Release
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           target: release
           load: true
