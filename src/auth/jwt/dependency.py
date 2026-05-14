@@ -1,12 +1,14 @@
+from typing import Annotated
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.repository import AuthRepository
-from src.auth.service import AuthService
+from src.auth.jwt.repository import AuthRepository
+from src.auth.jwt.service import AuthService
 from src.common.database import get_db
 
 
-async def get_auth_repository(session: AsyncSession = Depends(get_db)) -> AuthRepository:
+async def get_auth_repository(session: Annotated[AsyncSession, Depends(get_db)]) -> AuthRepository:
     """
     Get an Auth repository.
 
@@ -23,7 +25,7 @@ async def get_auth_repository(session: AsyncSession = Depends(get_db)) -> AuthRe
     return AuthRepository(session)
 
 
-async def get_auth_service(repository: AuthRepository = Depends(get_auth_repository)) -> AuthService:
+async def get_auth_service(repository: Annotated[AuthRepository, Depends(get_auth_repository)]) -> AuthService:
     """
     Get an Auth service.
 

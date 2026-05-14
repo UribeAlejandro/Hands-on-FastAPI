@@ -45,6 +45,14 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+    develop:
+      watch:
+        - path: ./src
+          action: sync
+          target: /app/src
+        - path: ./pyproject.toml
+          action: rebuild
+    working_dir: /app
 
 volumes:
   postgres_data:

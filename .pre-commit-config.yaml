@@ -10,6 +10,7 @@ repos:
       - id: check-merge-conflict
       - id: check-docstring-first
       - id: name-tests-test
+        exclude: tests/constants.py
       - id: sort-simple-yaml
       - id: debug-statements
       - id: end-of-file-fixer

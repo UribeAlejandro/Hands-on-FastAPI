@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from pydantic import ConfigDict, EmailStr
 from sqlmodel import TIMESTAMP, Column, Field, SQLModel, text
 
-from src.auth.enum import UserRole
+from src.auth.users.enum import UserRole
 
 
 class UserBase(SQLModel):

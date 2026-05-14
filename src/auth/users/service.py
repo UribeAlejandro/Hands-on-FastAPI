@@ -1,13 +1,14 @@
 from uuid import UUID
 
 from src.auth.models import UserCreate, UserRead, UserUpdate
-from src.auth.repository import AuthRepository
+from src.auth.schemas import Token
+from src.auth.users.repository import UsersRepository
 
 
-class AuthService:
-    """Service layer for authentication-related operations."""
+class UsersService:
+    """Service layer for user-related operations."""
 
-    def __init__(self, repository: AuthRepository):
+    def __init__(self, repository: UsersRepository):
         self.repository = repository
 
     async def create_user(self, user_create: UserCreate) -> UserRead:
@@ -82,3 +83,21 @@ class AuthService:
             return False
         await self.repository.delete_user(user_id)
         return True
+
+    async def authenticate_user(self, username: str, password: str) -> Token:
+        """
+        Authenticate a user by their username and password.
+
+        Parameters
+        ----------
+        username : str
+            The username of the user to authenticate.
+        password : str
+            The password of the user to authenticate.
+
+        Returns
+        -------
+        Token
+
+        """
+        return await self.repository.authenticate_user(username, password)

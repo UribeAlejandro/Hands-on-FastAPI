@@ -37,7 +37,7 @@ test:			## Run the tests
 run-docker:		## Run the application in Docker
 	@echo "Running the application in Docker"
 	docker compose build
-	docker compose up -d
+	docker compose up --watch
 	docker compose exec app uv run alembic upgrade head
 
 .PHONY: run-migrations

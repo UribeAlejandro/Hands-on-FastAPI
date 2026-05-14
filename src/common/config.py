@@ -26,5 +26,10 @@ class AppSettings(BaseSettings):
     echo_sql: bool
     database_url: str
 
+    # JWT settings
+    jwt_secret_key: str
+    jwt_algorithm: str
+    jwt_expires_delta_hours: int = 24
+
 
 settings = AppSettings()

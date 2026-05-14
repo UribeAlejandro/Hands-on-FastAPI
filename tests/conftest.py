@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncGenerator, Generator
+from uuid import UUID
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -13,6 +14,7 @@ from src.common.config import settings
 from src.common.database import get_db
 from src.main import app
 from src.todo.models import ToDo, ToDoCreate
+from tests.constants import TODO, USER
 
 pytest_plugins = ["anyio"]
 
@@ -96,7 +98,7 @@ async def test_app(test_db_session: AsyncSession) -> AsyncGenerator[AsyncClient]
     app.dependency_overrides.clear()
 
 
-async def create_user(test_app) -> UserRead:
+async def create_user(test_app: AsyncClient) -> UserRead:
     """
     Creates a new user for testing.
 
@@ -111,19 +113,19 @@ async def create_user(test_app) -> UserRead:
         The created user.
     """
     _user = UserCreate(
-        username="testuser1",
-        email="user@user.com",
-        password="password12345678910",
-        first_name="Test",
-        last_name="User",
-        role="user",
+        username=USER["username"],
+        email=USER["email"],
+        password=USER["password"],
+        first_name=USER["first_name"],
+        last_name=USER["last_name"],
+        role=USER["role"],
     )
-    response = await test_app.post("/auth", json=_user.model_dump())
+    response = await test_app.post("/users/register", json=_user.model_dump())
     assert response.status_code == 201, f"Failed to create user: {response.text}"
     return UserRead.model_validate(response.json())
 
 
-async def create_todo(test_app, user_id) -> ToDo:
+async def create_todo(test_app: AsyncClient, user_id: UUID) -> ToDo:
     """
     Creates a new todo item for testing.
 
@@ -140,11 +142,56 @@ async def create_todo(test_app, user_id) -> ToDo:
         The created todo item.
     """
     _todo = ToDoCreate(
-        title="Test Todo",
-        description="This is a test todo item.",
-        priority=1,
+        title=TODO["title"],
+        description=TODO["description"],
+        priority=TODO["priority"],
         user_id=user_id,
     )
     response = await test_app.post("/todo/", json=_todo.model_dump())
     assert response.status_code == 201, f"Failed to create todo: {response.text}"
     return ToDo.model_validate(response.json())
+
+
+async def login_user(test_app: AsyncClient, username: str, password: str) -> str:
+    """
+    Logs in a user and returns the access token.
+
+    Parameters
+    ----------
+    test_app : AsyncClient
+        The test client to use for making requests to the application.
+    username : str
+        The username of the user to log in.
+    password : str
+        The password of the user to log in.
+
+    Returns
+    -------
+    str
+        The access token for the logged-in user.
+    """
+    response = await test_app.post(
+        "/auth/jwt/login",
+        data={"username": username, "password": password},
+    )
+    data = response.json()
+    assert response.status_code == 200, f"Failed to login: {response.text}"
+    assert data["token_type"] == "bearer", f"Unexpected token type: {data.get('token_type')}"
+    return data["access_token"]
+
+
+def auth_header(token: str) -> dict[str, str]:
+    """
+    Creates an authorization header for the given token.
+
+    Parameters
+    ----------
+    token : str
+        The JWT token to include in the authorization header.
+
+    Returns
+    -------
+    dict[str, str]
+        A dictionary containing the authorization header with the provided token.
+    """
+    return {"Authorization": f"Bearer {token}"}

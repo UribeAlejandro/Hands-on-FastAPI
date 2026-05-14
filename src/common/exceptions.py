@@ -20,3 +20,10 @@ class UserNotFoundException(Exception):
     def __init__(self, user_id: str):
         self.user_id = user_id
         super().__init__(f"User with id '{user_id}' not found.")
+
+
+class InvalidCredentialsException(Exception):
+    """Exception raised when the provided credentials are invalid."""
+
+    def __init__(self):
+        super().__init__("Invalid username or password.")
