@@ -51,7 +51,7 @@ class ToDo(ToDoBase, ToDoUserForeignKeyBase, table=True):
 class ToDoCreate(ToDoBase, ToDoUserForeignKeyBase):
     """Model for creating a new ToDo item."""
 
-    pass
+    pass  # noqa: PIE790
 
 
 class ToDoUpdate(ToDoBase):
