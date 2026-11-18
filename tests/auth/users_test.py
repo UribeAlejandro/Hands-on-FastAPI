@@ -11,7 +11,7 @@ from tests.constants import USER
 async def test_get_non_existent_user_by_id(test_app) -> None:
     """Test retrieving a non-existent user by their ID."""
     _uuid = uuid.uuid4()
-    response = await test_app.get(f"/users/{str(_uuid)}")
+    response = await test_app.get(f"/users/{str(_uuid)}")  # noqa: RUF010
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "User not found"
@@ -22,7 +22,7 @@ async def test_update_non_existent_user_by_id(test_app) -> None:
     """Test updating a non-existent user by their ID."""
     _uuid = uuid.uuid4()
     updated_user = UserUpdate(username="updated_test_user")
-    response = await test_app.put(f"/users/{str(_uuid)}", json=updated_user.model_dump())
+    response = await test_app.put(f"/users/{str(_uuid)}", json=updated_user.model_dump())  # noqa: RUF010
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "User not found"
@@ -32,7 +32,7 @@ async def test_update_non_existent_user_by_id(test_app) -> None:
 async def test_delete_non_existent_user_by_id(test_app) -> None:
     """Test deleting a non-existent user by their ID."""
     _uuid = uuid.uuid4()
-    response = await test_app.delete(f"/users/{str(_uuid)}")
+    response = await test_app.delete(f"/users/{str(_uuid)}")  # noqa: RUF010
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "User not found"
